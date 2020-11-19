@@ -83,8 +83,8 @@ function fetchCsvCallOthers(file)
             d.number = +1;
             d.time = +d.time;
             d.duration = +d.duration;
-            d.x = +d.screen_x;
-            d.y = +d.screen_y;
+            d.x = +d.x;
+            d.y = +d.y;
             // d.avg_dilation = +d.avg_dilation;    //not convert to number in order to detect nan value!
         });
         mergedData = data;
