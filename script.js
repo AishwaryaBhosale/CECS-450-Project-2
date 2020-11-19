@@ -1,4 +1,4 @@
-
+const fileNames = ['mergedTree.csv', 'mergedGraph.csv']
 
 var xScale, yScale, timeScale;
 var rScale = d3.scaleLinear()
@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', function(){
         .attr("width", '100%')
         .attr("height", '100%')
         .attr("id", "drawnSvg1");
-    svg1.append('g').attr('id','plotG');
-    svg1.append('g').attr('id','guideG');
+    svg1.append('g').attr('id',`plot${fileNames[0].split('.csv')[0]}`);
+    svg1.append('g').attr('id',`guide${fileNames[0].split('.csv')[0]}`);
 
     //drawLegends();
-    fetchCsvCallOthers("mergedTree.csv");
+    fetchCsvCallOthers(fileNames[0]);
 	
 	svgDivGraph = document.getElementById("svgDivGraph");
     svgWidth = +500;
@@ -46,10 +46,10 @@ document.addEventListener('DOMContentLoaded', function(){
         .attr("width", '100%')
         .attr("height", '100%')
         .attr("id", "drawnSvg2");
-    svg2.append('g').attr('id','plotG');
-    svg2.append('g').attr('id','guideG');
+    svg2.append('g').attr('id',`plot${fileNames[1].split('.csv')[0]}`);
+    svg2.append('g').attr('id',`guide${fileNames[1].split('.csv')[0]}`);
 	
-	fetchCsvCallOthers("mergedGraph.csv");
+	fetchCsvCallOthers(fileNames[1]);
 
 });
 
@@ -69,10 +69,12 @@ function fetchCsvCallOthers(file)
     var drawnSvg = document.getElementById("drawnSvg");
     //removing previously drawn circles
     if(drawnSvg != undefined) {
-        d3.select('#'+file).select('#plotG').selectAll('*').remove();
-        d3.select('#'+file).select('#guideG').selectAll('*').remove();
+        
+        d3.select('#'+file).select(`#plot${file.split('.csv')[0]}`).selectAll('*').remove();
+        d3.select('#'+file).select(`#guide${file.split('.csv')[0]}`).selectAll('*').remove();
     }
     //var file = "mergedTree.csv";
+    console.log(file)
     d3.csv(file)
     .then(function(data){
         //converting all rows to int
@@ -80,21 +82,22 @@ function fetchCsvCallOthers(file)
             d.number = +1;
             d.time = +d.time;
             d.duration = +d.duration;
-            d.x = +d.x;
-            d.y = +d.y;
+            d.x = +d.screen_x;
+            d.y = +d.screen_y;
             // d.avg_dilation = +d.avg_dilation;    //not convert to number in order to detect nan value!
         });
         mergedData = data;
         setScales(mergedData);
-        render(mergedData);
+        render(mergedData, file);
         //resetTime();
     });
 }
 
-function render(dataset)
+function render(dataset, file)
 {
     console.log('drawing circles.');
-
+    console.log(`dataset:`)
+    console.dir(dataset[0])
     var tooltip = d3.select("body")
         .append("div")
         .attr("class", "tooltipDiv")
@@ -102,8 +105,12 @@ function render(dataset)
         .style("z-index", "10")
         .style("visibility", "hidden")
         .text("");
-        
-    var plotG = svg1.select('#plotG');
+    if (file === fileNames[0]) {
+        var plotG = svg1.select(`#plot${file.split('.csv')[0]}`);
+    }
+    else if (file === fileNames[1]) {
+        var plotG = svg2.select(`#plot${file.split('.csv')[0]}`);
+    }
 
     
     var convexhull = plotG.append("polygon")
@@ -351,7 +358,7 @@ function drawXYMark()
     
 }
 
-function filterByTime(val) {
+function filterByTime(val, n) {
     //showConvexhull('disable');
 
     timeSlider.attr('value', val);
@@ -364,7 +371,7 @@ function filterByTime(val) {
     //     })
     //     .style('opacity', highlightOpacity);
     
-    svg1.select('#plotG').selectAll('circle')
+    svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
         .style('visibility', 'hidden')
         .filter(function(d) {
             return (d.time <= milliSeconds);
