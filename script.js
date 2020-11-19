@@ -7,14 +7,15 @@ var colorScale = d3.scaleLinear()
     .range(['#6e34eb', '#eb347d', '#34ebd6'])
     .interpolate(d3.interpolateHcl);
 
-var timeSlider = d3.select('#timeRange');
+var timeSlider0 = d3.select('#timeRange0');
+var timeSlider1 = d3.select('#timeRange1');
 var ViewOption = {
     XY: 1,
     TIMEDURATION: 2,
     TIMESACCADE: 3
 };
-function updateTimeLabel(val) {
-    d3.select('#timeLabel').text(val);
+function updateTimeLabel(val, n) {
+    d3.select(`#timeLabel${n}`).text(val);
 }
 var currentViewOption = ViewOption.XY;
 
@@ -87,7 +88,7 @@ function fetchCsvCallOthers(file)
             // d.avg_dilation = +d.avg_dilation;    //not convert to number in order to detect nan value!
         });
         mergedData = data;
-        setScales(mergedData);
+        setScales(mergedData, file);
         render(mergedData, file);
         //resetTime();
     });
@@ -202,14 +203,18 @@ function render(dataset, file)
 
 function showTimeSlider(show){
     if(show == true) {
-        timeSlider.style("visibility", "visible");
-        d3.select('#timeLabel').style("visibility", "visible");
+        timeSlider0.style("visibility", "visible");
+        timeSlider1.style("visibility", "visible");
+        d3.select('#timeLabel0').style("visibility", "visible");
+        d3.select('#timeLabel1').style("visibility", "visible");
     } else {
-        timeSlider.style("visibility", "hidden");
-        d3.select('#timeLabel').style("visibility", "hidden");    
+        timeSlider0.style("visibility", "hidden");
+        timeSlider1.style("visibility", "hidden");
+        d3.select('#timeLabel0').style("visibility", "hidden");    
+        d3.select('#timeLabel1').style("visibility", "hidden");   
     }
 }
-function setScales(data)
+function setScales(data, file)
 {
     console.log('setting scales.');
 
@@ -218,7 +223,7 @@ function setScales(data)
     const durationValue = d => d.duration;   // plot size
     const pupilValue = d => +d.avg_dilation;  // plot color
     const timeValue = d => d.time;
-    xMax = d3.max(data, xValue	);
+    xMax = d3.max(data, xValue);
     xMin = d3.min(data, xValue);
     console.log('x '+xMin+' : '+xMax);
     yMax = d3.max(data, yValue);
@@ -251,7 +256,15 @@ function setScales(data)
         .range([0, 10])
         .nice();
         
-    timeSlider.attr('max',timeMax/1000);    //set time slider range
+    //set time slider range
+    if (file === fileNames[0]) {
+        d3.select('#timeRange0').attr('max', timeMax/1000) 
+        console.log(`timeSlider0.max: ${timeMax / 1000}`)
+    }  
+    else if (file === fileNames[1]) {
+        d3.select('#timeRange1').attr('max', timeMax/1000) 
+        console.log(`timeSlider1.max: ${timeMax / 1000}`)
+    }
 }
 
 
@@ -360,23 +373,50 @@ function drawXYMark()
 
 function filterByTime(val, n) {
     //showConvexhull('disable');
-
-    timeSlider.attr('value', val);
+    if (n == 0) {
+        timeSlider0.attr('value', val);
+        console.log(`timeSlider2.val: ${val}`);
+    }
+    else if (n == 1) {
+        timeSlider1.attr('value', val);
+        console.log(`timeSlider1.val: ${val}`);
+    }
     var milliSeconds = val * 1000;
-    updateTimeLabel(formatToMinuteSecond(milliSeconds));
+    updateTimeLabel(formatToMinuteSecond(milliSeconds), n);
     // svg.select('#plotG').selectAll('circle')
     //     .style('opacity', mutedOpacity)
     //     .filter(function(d) {
     //         return (d.time <= val);
     //     })
     //     .style('opacity', highlightOpacity);
-    
-    svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
+    if (n == 0) {
+        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
+            .style('visibility', 'hidden')
+            .filter(function(d) {
+                return (d.time <= milliSeconds);
+            })
+            .style('visibility', 'visible');
+        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
         .style('visibility', 'hidden')
         .filter(function(d) {
             return (d.time <= milliSeconds);
         })
         .style('visibility', 'visible');
+    }
+    else if (n === 1) {
+        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
+            .style('visibility', 'hidden')
+            .filter(function(d) {
+                return (d.time <= milliSeconds);
+            })
+            .style('visibility', 'visible');
+        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
+        .style('visibility', 'hidden')
+        .filter(function(d) {
+            return (d.time <= milliSeconds);
+        })
+        .style('visibility', 'visible');
+    }
 
     
 
