@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', function(){
     svg1.append('g').attr('id',`plot${fileNames[0].split('.csv')[0]}`);
     svg1.append('g').attr('id',`guide${fileNames[0].split('.csv')[0]}`);
 
-    //drawLegends();
     fetchCsvCallOthers(fileNames[0]);
 	
 	svgDivGraph = document.getElementById("svgDivGraph");
@@ -62,8 +61,7 @@ function sleep(delay) {
 
 function fetchCsvCallOthers(file)
 {
-    //showTimeSlider(false);
-    //clearAllFilters();    
+    
 
     console.log('fetching csv data.');
 
@@ -74,13 +72,12 @@ function fetchCsvCallOthers(file)
         d3.select('#'+file).select(`#plot${file.split('.csv')[0]}`).selectAll('*').remove();
         d3.select('#'+file).select(`#guide${file.split('.csv')[0]}`).selectAll('*').remove();
     }
-    //var file = "mergedTree.csv";
     console.log(file)
     d3.csv(file)
     .then(function(data){
         //converting all rows to int
         data.forEach(function(d,i) {
-            d.number = +1;
+            d.number = +d.number;
             d.time = +d.time;
             d.duration = +d.duration;
             d.x = +d.x;
@@ -90,7 +87,6 @@ function fetchCsvCallOthers(file)
         mergedData = data;
         setScales(mergedData, file);
         render(mergedData, file);
-        //resetTime();
     });
 }
 
@@ -125,8 +121,6 @@ function render(dataset, file)
     convexhull.datum(d3.polygonHull(vertices))
         .attr("points", function(d) { return d.join(" "); });
         
-   // showConvexhull(false);
-    //showSaccades(true);
 
     // Bind dataset to lines (for saccades)
     var saccades = plotG.selectAll("line")
@@ -193,9 +187,6 @@ function render(dataset, file)
             showTimeSlider(true);
         });
         
-        
-        //initial mode to xy
-        //drawXYMark();
         currentViewOption = ViewOption.XY;
         d3.select('#viewOptions').selectAll('button').classed('active', false);
         d3.select('#viewOption-xy').classed('active', true);
@@ -267,111 +258,8 @@ function setScales(data, file)
     }
 }
 
-
-function drawLegends()
-{
-    console.log('drawing svg under legends.');
-    const sliderLength = 120;
-    const gOffset = { x:25, y:25 };
-    const scaleX = d3.scaleLinear().range([0, sliderLength]);
-
-    // 1. Fixation Duration Legend
-    const durationG = d3.select('#svgDurationSlider').append('g')
-        .attr('transform',`translate(${gOffset.x},${gOffset.y})`);
-    const durCircles = [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
-    const durStepDots = [0, 0.5, 1, 1.5, 2];
-    const durStepTexts = [0, 1, 2];
-    scaleX.domain([0, d3.max(durCircles)]);
-    const scaleSize = rScale.domain([0, 2]);
-    //back circles
-    durationG.selectAll('circle')
-        .data(durCircles).enter().append('circle')
-        .attr('cx', d => scaleX(d))
-        .attr('r', d => scaleSize(d))  //the size legend
-        .style('fill', '#CCC');
-    //lines for the slider
-    durationG.append('line').attr('x2',sliderLength);
-    durationG.insert('g').attr('class','steps')
-        .selectAll('circle')
-        .data(durStepDots).enter().append('circle')
-        .attr('cx', d=> scaleX(d));
-    durationG.select('.steps').selectAll('text')
-        .data(durStepTexts).enter().append('text')
-        .attr('x', d=> scaleX(d))
-        .attr('y', 18)  //how far the numbers away from line
-        .text(d => {return d;});
-    durationG.select('.steps').append('text')
-        .attr('x', sliderLength+9).attr('y', 18)
-        .text('s');
-
-    // 2. Pupil Dilation Legend
-    const pupilG = d3.select('#svgPupilSlider').append('g')
-        .attr('transform',`translate(${gOffset.x},${gOffset.y})`);
-    const pupilCircles = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
-    const pupilStepDots = [0, 0.25, 0.5, 0.75, 1];
-    const pupilStepTexts = [0, 1];
-    scaleX.domain([0, d3.max(pupilCircles)]);
-    const scaleColor = colorScale.domain([0, 0.3, 1]);
-    //back circles
-    pupilG.selectAll('circle')
-        .data(pupilCircles).enter().append('circle')
-        .attr('cx', d => scaleX(d))
-        .attr('r', 14)
-        .style('fill', d => scaleColor(d));  //the color legend
-    //lines for the slider
-    pupilG.append('line').attr('x2',sliderLength);
-    pupilG.insert('g').attr('class','steps')
-        .selectAll('circle')
-        .data(pupilStepDots).enter().append('circle')
-        .attr('cx', d=> scaleX(d));
-    pupilG.select('.steps').selectAll('text')
-        .data(pupilStepTexts).enter().append('text')
-        .attr('x', d=> scaleX(d))
-        .attr('y', 25)  //how far the numbers away from line
-        .text(d => {return d;});
-    pupilG.select('.steps').append('text')
-        .attr('x', sliderLength+15).attr('y', 25)
-        .text('mm');
-
-}
-
-
-
-
-function drawXYMark()
-{
-    const guideG = svg1.select('#guideG');
-    guideG.selectAll('*').remove();    //remove all previously drawn guides
-
-    //NOTE: this can be imported from svg file
-    guideG.attr('transform','translate(5,5)');
-    var len = 50;
-
-    var xAxis = guideG.append('g').attr('transform',`translate(5, 0)`);
-    xAxis.append('line').attr('x2',len);
-    xAxis.append('line').attr('x2',-5).attr('y2',-3)
-        .attr('transform',`translate(${len}, 0)`);
-    xAxis.append('text').text('x')
-        .attr('transform',`translate(${len+8}, 4)`);
-
-    var yAxis = guideG.append('g').attr('transform',`translate(0, 5)`);
-    yAxis.append('line').attr('y2',len);
-    yAxis.append('line').attr('x2',-3).attr('y2',-5)
-        .attr('transform',`translate(0, ${len})`);
-    yAxis.append('text').text('y')
-        .attr('transform',`translate(0, ${len+12})`);
-
-    guideG.selectAll('line').classed('axis-line',true);
-    guideG.selectAll('text').classed('axis-stepText',true);
-
-    //transition
-    guideG.attr('opacity',0)
-        .transition().duration(1000)
-        .attr('opacity',1);
-    
-}
-
 function filterByTime(val, n) {
+
     //showConvexhull('disable');
     if (n == 0) {
         timeSlider0.attr('value', val);
@@ -383,12 +271,6 @@ function filterByTime(val, n) {
     }
     var milliSeconds = val * 1000;
     updateTimeLabel(formatToMinuteSecond(milliSeconds), n);
-    // svg.select('#plotG').selectAll('circle')
-    //     .style('opacity', mutedOpacity)
-    //     .filter(function(d) {
-    //         return (d.time <= val);
-    //     })
-    //     .style('opacity', highlightOpacity);
     if (n == 0) {
         svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
             .style('visibility', 'hidden')
@@ -417,9 +299,6 @@ function filterByTime(val, n) {
         })
         .style('visibility', 'visible');
     }
-
-    
-
 }
 function formatToMinuteSecond(milliSeconds) {
     var minutes = Math.floor(milliSeconds / 60000);

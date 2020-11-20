@@ -212,28 +212,30 @@ finalGraph.head()
 
 # # Data preparation for visualization
 
-# In[35]:
+# In[47]:
 
 
 # Performing left join on fixation data to see change in avg_dilation with size in treeFxd
 mergedTree = pd.merge(treeFxd, finalTree, on = 'time', how = 'left')
-mergedTree = mergedTree.drop(['number_x','number_y'], axis = 1)
+mergedTree.rename(columns={'number_x':'number'}, inplace=True)
+mergedTree = mergedTree.drop(['number_y'], axis = 1)
 mergedTree.head()
 
 
-# In[36]:
+# In[50]:
 
 
 # Performing left join on fixation data to see change in avg_dilation with size in graphFxd
 mergedGraph = pd.merge(graphFxd, finalGraph, on = 'time', how = 'left')
-mergedGraph = mergedGraph.drop(['number_x','number_y'], axis = 1)
+mergedGraph.rename(columns={'number_x':'number'}, inplace=True)
+mergedGraph = mergedGraph.drop(['number_y'], axis = 1)
 mergedGraph.head()
 
 
 # # Convert to csv for rendering
 # 
 
-# In[37]:
+# In[51]:
 
 
 mergedTree.to_csv('mergedTree.csv', index = False)
