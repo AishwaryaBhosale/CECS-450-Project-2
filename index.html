@@ -19,32 +19,49 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <head>
     <meta charset="UTF-8">
-    <title>Tree Fixation Points</title>
+    <title>Eye Gaze Data Visualization</title>
 </head>
 <body>
+    <h1 style="text-align: center;">Eye Gaze Data Visualization</h1>
 <div class="flex-container">
     <div style="width:600px">
         <h>Tree</h>
-        <div style="width: 500px; height: 500px; border: 2px solid black;">
-            <svg id="svgDivTree" width="500" height="500"></svg>
+        <div style="width: 500px; height: 450px; border: 2px solid black;">
+            <svg id="svgDivTree" width="500" height="450"></svg>
+            
             <div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                <label for="time-div">Time</label>
                 <input type="range" id="timeRange0" class="slider"
-                    oninput="filterByTime(this.value, 0)" min='0' max='1000' step='1' value='' >
-                <p id="timeLabel0" for="timeRange" class="m-0" >m:ss</p>
+                    oninput="filterByTime(this.value, 0)" min='0' max='1000' step='1' value='0' >
+                <p id="timeLabel0" for="timeRange" class="m-0" >0:00 m:ss</p>
+            </div>
+			<div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                <label for="time-div">Pupil Dilation</label>
+                <input type="range" id="pupilRange0" class="slider"
+                    oninput="filterByPupilDilation(this.value, 0)" min='0' max='1000' step='1' value='0' >
+                <p id="pupilLabel0" for="timeRange" class="m-0" >0 mm</p>
             </div>
         </div>
     </div>
     <div style="width:600px">
         <h>Graph</h>
-        <div style="width: 500px; height: 500px; border: 2px solid black;">
-            <svg id="svgDivGraph" width="500" height="500"></svg>
+        <div style="width: 500px; height: 450px; border: 2px solid black;">
+            <svg id="svgDivGraph" width="500" height="450"></svg>
             <div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                <label for="timeRange1">Time</label>
                 <input type="range" id="timeRange1" class="slider"
-                    oninput="filterByTime(this.value, 1)" min='0' max='1000' step='1' value='' >
-                <p id="timeLabel1" for="timeRange" class="m-0" >m:ss</p>
+                    oninput="filterByTime(this.value, 1)" min='0' max='1000' step='1' value='0' >
+                <p id="timeLabel1" for="timeRange" class="m-0" >0:00 m:ss</p>
+            </div>
+			<div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                <label for="pupilRange1">Pupil Dilation</label>
+                <input type="range" id="pupilRange1" class="slider"
+                    oninput="filterByPupilDilation(this.value, 1)" min='0' max='1000' step='1' value='0' >
+                <p id="pupilLabel1" for="timeRange" class="m-0" >0 mm</p>
             </div>
         </div>
     </div>
+	
 </div>
 </body>
 </html>
