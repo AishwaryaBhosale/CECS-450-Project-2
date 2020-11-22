@@ -7,47 +7,52 @@ let colorScale = d3.scaleLinear()
     .range(['#6e34eb', '#eb347d', '#34ebd6'])
     .interpolate(d3.interpolateHcl);
 
-let ViewOption = {
+var ViewOption = {
     XY: 1,
     TIMEDURATION: 2,
     TIMESACCADE: 3
 };
-
 const updateTimeLabel = (val, n) => {
     d3.select(`#timeLabel${n}`).text(val);
 }
-let currentViewOption = ViewOption.XY;
+var currentViewOption = ViewOption.XY;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded. Initiating all setups.');
     
     //setting global vars and drawing csv
+    svgDivTree= document.getElementById("svgDivTree");
+    svgWidth = +500;
+    svgHeight = +500;
 
-    d3.select("#svg-div-0")
+    svg1 = d3.select("#svgDivTree")
         .append("svg")
         .attr("width", '100%')
         .attr("height", '100%')
         .attr("id", "drawnSvg1");
-    d3.select("#svg-div-0").append('g').attr('id',`plot${fileNames[0].split('.csv')[0]}`);
-    d3.select("#svg-div-0").append('g').attr('id',`guide${fileNames[0].split('.csv')[0]}`);
+    svg1.append('g').attr('id',`plot${fileNames[0].split('.csv')[0]}`);
+    svg1.append('g').attr('id',`guide${fileNames[0].split('.csv')[0]}`);
 
     fetchCsvCallOthers(fileNames[0]);
 	
+	svgDivGraph = document.getElementById("svgDivGraph");
+    svgWidth = +500;
+    svgHeight = +500;
     sleep(3000);
-    d3.select("#svg-div-1")
+    svg2 = d3.select("#svgDivGraph")
         .append("svg")
         .attr("width", '100%')
         .attr("height", '100%')
         .attr("id", "drawnSvg2");
-    d3.select("#svg-div-1").append('g').attr('id',`plot${fileNames[1].split('.csv')[0]}`);
-    d3.select("#svg-div-1").append('g').attr('id',`guide${fileNames[1].split('.csv')[0]}`);
+    svg2.append('g').attr('id',`plot${fileNames[1].split('.csv')[0]}`);
+    svg2.append('g').attr('id',`guide${fileNames[1].split('.csv')[0]}`);
 	
 	fetchCsvCallOthers(fileNames[1]);
 
 });
 
 const sleep = (delay) => {
-    const start = new Date().getTime();
+    var start = new Date().getTime();
     while (new Date().getTime() < start + delay);
 }
 
@@ -91,10 +96,10 @@ const render = (dataset, file) => {
         .style("visibility", "hidden")
         .text("");
     if (file === fileNames[0]) {
-        var plotG = d3.select("#svg-div-0").select(`#plot${file.split('.csv')[0]}`);
+        var plotG = svg1.select(`#plot${file.split('.csv')[0]}`);
     }
     else if (file === fileNames[1]) {
-        var plotG = d3.select("#svg-div-1").select(`#plot${file.split('.csv')[0]}`);
+        var plotG = svg2.select(`#plot${file.split('.csv')[0]}`);
     }
 
     
@@ -259,27 +264,27 @@ const filterByTime = (val, n) => {
     var milliSeconds = val * 1000;
     updateTimeLabel(formatToMinuteSecond(milliSeconds), n);
     if (n == 0) {
-        d3.select("#svg-div-0").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
+        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
             .style('visibility', 'hidden')
             .filter((d) => {
                 return (d.time <= milliSeconds);
             })
             .style('visibility', 'visible');
-        d3.select("#svg-div-0").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
-            .style('visibility', 'hidden')
-            .filter((d) => {
-                return (d.time <= milliSeconds);
-            })
-            .style('visibility', 'visible');
+        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
+        .style('visibility', 'hidden')
+        .filter((d) => {
+            return (d.time <= milliSeconds);
+        })
+        .style('visibility', 'visible');
     }
     else if (n === 1) {
-        d3.select("#svg-div-1").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
+        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
             .style('visibility', 'hidden')
             .filter((d) => {
                 return (d.time <= milliSeconds);
             })
             .style('visibility', 'visible');
-        d3.select("#svg-div-1").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
+        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
         .style('visibility', 'hidden')
         .filter((d) => {
             return (d.time <= milliSeconds);
