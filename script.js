@@ -63,14 +63,11 @@ const render = (dataset, file) => {
     //put scaled d.x and d.y into vertices
     vertices = [];
     mergedData.forEach((d,i) => {
-        vertices[i] = [xScale(d.x), yScale(d.y)];   //for convex hull
+        vertices[i] = [xScale(d.x), yScale(d.y)];  //for convex hull
     });
     convexhull.datum(d3.polygonHull(vertices))
         .attr("points", (d) => { return d.join(" "); });
         
-   // showConvexhull(false);
-    //showSaccades(true);
-
     // Bind dataset to lines (for saccades)
     var saccades = plotG.selectAll("line")
         .data(dataset, (d) => {return d;}); //semantic binding
@@ -187,8 +184,6 @@ const setScales = (data, file) => {
         .nice();
     rScale.domain([100, durationMax]).nice();
     colorScale.domain([0, 0.4, 1]);     //fixed with exagerated changes
-        // .domain([0, (pupilMin+pupilMax)/2, pupilMax])   //show the distribution as it is
-        // .domain([0, pupilMax*0.4, pupilMax])            //bit distorted
     timeScale = d3.scaleLinear()
         .domain([0, timeMax])
         .range([0, 10])
