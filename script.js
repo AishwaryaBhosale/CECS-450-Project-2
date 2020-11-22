@@ -104,6 +104,8 @@ const render = (dataset, file) => {
         .attr("cy", d => yScale(d.y))
         .attr("r", d => rScale(d.duration))
         .attr("fill", (d) => {
+            if (d.avg_dilation == 0.8550982142857144){ console.dir(d); }
+            
             return (d.avg_dilation=="") ? 'darkgray' : colorScale(+d.avg_dilation);
         })
         .on('mouseover', (d) => {
@@ -195,7 +197,7 @@ const setScales = (data, file) => {
     // Set time slider range
     d3.select(`#slider-${fileNames.indexOf(file)}`).attr('max', timeMax/1000) 
     console.log(`#slider-${fileNames.indexOf(file)}: ${timeMax / 1000}`)
-    d3.select(`#pupilSlider-${fileNames.indexOf(file)}`).attr('max', pupilMax*100) 
+    d3.select(`#pupilSlider-${fileNames.indexOf(file)}`).attr('max', (pupilMax + 0.005) *100) // Add 0.005 to fix rounding error when setting max value
     console.log(`#pupilSlider-${fileNames.indexOf(file)}: ${pupilMax* 100}`)
 }
 
@@ -226,27 +228,25 @@ const filterByTime = (val, i) => {
 }
 
 const filterByDilation = (val, i) => {
-    const ms = val/100;
+    const mm = val/100;
 
     // Adjust the value of slider
     d3.select(`#pupilRange${i}`).attr('value', val);
 
     // Update the time label
-    updatePupilLabel(ms+" mm", i);
+    updatePupilLabel(mm + " mm", i);
 
     // Set visibility of circles
     d3.select(`#svg-div-${i}`).select(`#plot${fileNames[i].split('.csv')[0]}`).selectAll('circle')
         .style('visibility', 'hidden')
         .filter((d) => {
-            return (parseFloat(d.avg_dilation).toFixed(2) == ms );
+            return (parseFloat(d.avg_dilation).toFixed(2) == mm );
         })
         .style('visibility', 'visible');
     // Set visibility of lines
     d3.select(`#svg-div-${i}`).select(`#plot${fileNames[i].split('.csv')[0]}`).selectAll('line')
     .style('visibility', 'hidden')
-    .filter((d) => {
-        return (parseFloat(d.avg_dilation).toFixed(2) == ms);
-    })
+    .filter()
     .style('visibility', 'visible');
 }
 
