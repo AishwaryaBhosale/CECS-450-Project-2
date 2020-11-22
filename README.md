@@ -29,3 +29,4 @@ The aim of this assignment is to show participant five's gaze in the form of vis
 
 
 ## How it looks
+![eyegaze](eyegaze.jpg)
