@@ -33,7 +33,7 @@ const fetchCsvCallOthers = (file,i) => {
     .then((data) => {
         //converting all rows to int
         data.forEach((d,i) => {
-            d.number = +1;
+            d.number = +i;
             d.time = +d.time;
             d.duration = +d.duration;
             d.x = +d.screen_x;
@@ -114,12 +114,12 @@ const render = (dataset, file) => {
             tooltip.html(msg);
             tooltip.style("visibility", "visible");
         })
-        .on("mousemove", (d, i) => {
+        .on("mousemove", () => {
             return tooltip.style("top",
                 (d3.event.pageY-10)+"px")
                     .style("left",(d3.event.pageX+10)+"px");
         })
-        .on('mouseout', (d, i) => {
+        .on('mouseout', () => {
             tooltip.style("visibility", "hidden");
             d3.select('#details').html('');
         })
