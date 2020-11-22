@@ -1,6 +1,5 @@
 const fileNames = ['mergedTree.csv', 'mergedGraph.csv']
 
-let xScale, yScale, timeScale;
 let rScale = d3.scaleLinear()
     .range([3,23]);
 let colorScale = d3.scaleLinear()
@@ -12,60 +11,22 @@ var ViewOption = {
     TIMEDURATION: 2,
     TIMESACCADE: 3
 };
-const updateTimeLabel = (val, n) => {
-    d3.select(`#timeLabel${n}`).text(val);
-}
 var currentViewOption = ViewOption.XY;
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded. Initiating all setups.');
-    
-    //setting global vars and drawing csv
-    svgDivTree= document.getElementById("svgDivTree");
-    svgWidth = +500;
-    svgHeight = +500;
 
-    svg1 = d3.select("#svgDivTree")
-        .append("svg")
-        .attr("width", '100%')
-        .attr("height", '100%')
-        .attr("id", "drawnSvg1");
-    svg1.append('g').attr('id',`plot${fileNames[0].split('.csv')[0]}`);
-    svg1.append('g').attr('id',`guide${fileNames[0].split('.csv')[0]}`);
-
-    fetchCsvCallOthers(fileNames[0]);
-	
-	svgDivGraph = document.getElementById("svgDivGraph");
-    svgWidth = +500;
-    svgHeight = +500;
-    sleep(3000);
-    svg2 = d3.select("#svgDivGraph")
-        .append("svg")
-        .attr("width", '100%')
-        .attr("height", '100%')
-        .attr("id", "drawnSvg2");
-    svg2.append('g').attr('id',`plot${fileNames[1].split('.csv')[0]}`);
-    svg2.append('g').attr('id',`guide${fileNames[1].split('.csv')[0]}`);
-	
-	fetchCsvCallOthers(fileNames[1]);
-
+    for (var i = 0; i < fileNames.length; i++) {
+        console.log(`svg-div-${i}`)
+        d3.select(`#svg-div-${i}`).append('g').attr('id',`plot${fileNames[i].split('.csv')[0]}`);
+        
+        fetchCsvCallOthers(fileNames[i]);
+    }
 });
 
-const sleep = (delay) => {
-    var start = new Date().getTime();
-    while (new Date().getTime() < start + delay);
-}
-
-
 const fetchCsvCallOthers = (file) => {
-
-    console.log('fetching csv data.');
-
     // Removing previously drawn circles
-    if(document.getElementById("drawnSvg") != undefined) {
-        
+    if(document.getElementById(`drawnSvg${fileNames.indexOf(file)}`) != undefined) {
         d3.select('#'+file).select(`#plot${file.split('.csv')[0]}`).selectAll('*').remove();
-        d3.select('#'+file).select(`#guide${file.split('.csv')[0]}`).selectAll('*').remove();
     }
     
     d3.csv(file)
@@ -85,22 +46,17 @@ const fetchCsvCallOthers = (file) => {
 }
 
 const render = (dataset, file) => {
-    console.log('drawing circles.');
-    console.log(`dataset:`)
-    console.dir(dataset[0])
-    var tooltip = d3.select("body")
+
+    let tooltip = d3.select("body")
         .append("div")
         .attr("class", "tooltipDiv")
         .style("position", "absolute")
         .style("z-index", "10")
         .style("visibility", "hidden")
         .text("");
-    if (file === fileNames[0]) {
-        var plotG = svg1.select(`#plot${file.split('.csv')[0]}`);
-    }
-    else if (file === fileNames[1]) {
-        var plotG = svg2.select(`#plot${file.split('.csv')[0]}`);
-    }
+
+    var plotG = d3.select(`#svg-div-${fileNames.indexOf(file)}`).select(`#plot${file.split('.csv')[0]}`);
+    
 
     
     var convexhull = plotG.append("polygon")
@@ -153,8 +109,7 @@ const render = (dataset, file) => {
             return (d.avg_dilation=="") ? 'darkgray' : colorScale(+d.avg_dilation);
         })
         .on('mouseover', (d) => {
-            const msg = "<b>#" + d.number + "</b><br>"
-                      + "<b>time</b>     " + formatToMinuteSecond(d.time) + "<br>"
+            const msg = "<b>time</b>     " + formatSliderDisplay(d.time) + "<br>"
                       + "<b>x</b>:" + d.x+", <b>y</b>:"+d.y + "<br>"
                       + "<b>duration</b> " + d.duration + "ms <br>"
                       + "<b>dilation</b> "
@@ -179,7 +134,7 @@ const render = (dataset, file) => {
         .attr("visibility", "visible")
         .end()
         .then(() =>{
-            showTimeSlider(true);
+            showTimeSlider(true, fileNames.indexOf(file));
         });
         
         
@@ -189,15 +144,15 @@ const render = (dataset, file) => {
         d3.select('#viewOption-xy').classed('active', true);
 }
 
-const showTimeSlider = (show) => {
+// Change the visibility of slider
+const showTimeSlider = (show, i) => {
     if(show == true) {
-        d3.select('#timeLabel0').style("visibility", "visible");
-        d3.select('#timeLabel1').style("visibility", "visible");
-    } else {
-        d3.select('#timeLabel0').style("visibility", "hidden");    
-        d3.select('#timeLabel1').style("visibility", "hidden");   
+        d3.select(`#time-label-${i}`).style("visibility", "visible");
+    } else { 
+        d3.select(`#time-label-${i}`).style("visibility", "hidden");
     }
 }
+
 const setScales = (data, file) => {
     console.log('setting scales.');
 
@@ -224,11 +179,11 @@ const setScales = (data, file) => {
 
     xScale = d3.scaleLinear()
         .domain([0, xMax])
-        .range([0+20, svgWidth-50])
+        .range([0+20, 450])
         .nice();
     yScale = d3.scaleLinear()
         .domain([0, yMax])
-        .range([0+20, svgHeight-50])
+        .range([0+20, 450])
         .nice();
     rScale.domain([100, durationMax]).nice();
     colorScale.domain([0, 0.4, 1]);     //fixed with exagerated changes
@@ -239,63 +194,44 @@ const setScales = (data, file) => {
         .range([0, 10])
         .nice();
         
-    //set time slider range
-    if (file === fileNames[0]) {
-        d3.select('#timeRange0').attr('max', timeMax/1000) 
-        console.log(`timeSlider0.max: ${timeMax / 1000}`)
-    }  
-    else if (file === fileNames[1]) {
-        d3.select('#timeRange1').attr('max', timeMax/1000) 
-        console.log(`timeSlider1.max: ${timeMax / 1000}`)
-    }
+    // Set time slider range
+    d3.select(`#slider-${fileNames.indexOf(file)}`).attr('max', timeMax/1000) 
+    console.log(`#slider-${fileNames.indexOf(file)}: ${timeMax / 1000}`)
 }
 
 
-const filterByTime = (val, n) => {
-    //showConvexhull('disable');
-    if (n == 0) {
-        d3.select('#timeRange0').attr('value', val);
-        console.log(`timeSlider2.val: ${val}`);
-    }
-    else if (n == 1) {
-        d3.select('#timeRange1').attr('value', val);
-        console.log(`timeSlider1.val: ${val}`);
-    }
-    var milliSeconds = val * 1000;
-    updateTimeLabel(formatToMinuteSecond(milliSeconds), n);
-    if (n == 0) {
-        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
-            .style('visibility', 'hidden')
-            .filter((d) => {
-                return (d.time <= milliSeconds);
-            })
-            .style('visibility', 'visible');
-        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
-        .style('visibility', 'hidden')
-        .filter((d) => {
-            return (d.time <= milliSeconds);
-        })
-        .style('visibility', 'visible');
-    }
-    else if (n === 1) {
-        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
-            .style('visibility', 'hidden')
-            .filter((d) => {
-                return (d.time <= milliSeconds);
-            })
-            .style('visibility', 'visible');
-        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
-        .style('visibility', 'hidden')
-        .filter((d) => {
-            return (d.time <= milliSeconds);
-        })
-        .style('visibility', 'visible');
-    }
+const filterByTime = (val, i) => {
+    const ms = val * 1000;
 
+    // Adjust the value of slider
+    d3.select(`#timeRange${i}`).attr('value', val);
+
+    // Update the time label
+    updateTimeLabel(formatSliderDisplay(ms), i);
+
+    // Set visibility of circles
+    d3.select(`#svg-div-${i}`).select(`#plot${fileNames[i].split('.csv')[0]}`).selectAll('circle')
+        .style('visibility', 'hidden')
+        .filter((d) => {
+            return (d.time <= ms);
+        })
+        .style('visibility', 'visible');
+    // Set visibility of lines
+    d3.select(`#svg-div-${i}`).select(`#plot${fileNames[i].split('.csv')[0]}`).selectAll('line')
+    .style('visibility', 'hidden')
+    .filter((d) => {
+        return (d.time <= ms);
+    })
+    .style('visibility', 'visible');
 }
 
-const formatToMinuteSecond = (milliSeconds) => {
-    var minutes = Math.floor(milliSeconds / 60000);
-    var seconds = ((milliSeconds % 60000) / 1000).toFixed(0);
+
+const updateTimeLabel = (val, i) => {
+    d3.select(`#time-label-${i}`).text(val);
+}
+
+const formatSliderDisplay = (ms) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(0);
     return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
 }
