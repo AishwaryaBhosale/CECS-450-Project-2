@@ -1,88 +1,77 @@
 const fileNames = ['mergedTree.csv', 'mergedGraph.csv']
 
-var xScale, yScale, timeScale;
-var rScale = d3.scaleLinear()
+let xScale, yScale, timeScale;
+let rScale = d3.scaleLinear()
     .range([3,23]);
-var colorScale = d3.scaleLinear()
+let colorScale = d3.scaleLinear()
     .range(['#6e34eb', '#eb347d', '#34ebd6'])
     .interpolate(d3.interpolateHcl);
 
-var timeSlider0 = d3.select('#timeRange0');
-var timeSlider1 = d3.select('#timeRange1');
-var ViewOption = {
+let ViewOption = {
     XY: 1,
     TIMEDURATION: 2,
     TIMESACCADE: 3
 };
-function updateTimeLabel(val, n) {
+
+const updateTimeLabel = (val, n) => {
     d3.select(`#timeLabel${n}`).text(val);
 }
-var currentViewOption = ViewOption.XY;
+let currentViewOption = ViewOption.XY;
 
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded. Initiating all setups.');
     
     //setting global vars and drawing csv
-    svgDivTree= document.getElementById("svgDivTree");
-    svgWidth = +500;
-    svgHeight = +500;
 
-    svg1 = d3.select("#svgDivTree")
+    d3.select("#svg-div-0")
         .append("svg")
         .attr("width", '100%')
         .attr("height", '100%')
         .attr("id", "drawnSvg1");
-    svg1.append('g').attr('id',`plot${fileNames[0].split('.csv')[0]}`);
-    svg1.append('g').attr('id',`guide${fileNames[0].split('.csv')[0]}`);
+    d3.select("#svg-div-0").append('g').attr('id',`plot${fileNames[0].split('.csv')[0]}`);
+    d3.select("#svg-div-0").append('g').attr('id',`guide${fileNames[0].split('.csv')[0]}`);
 
     fetchCsvCallOthers(fileNames[0]);
 	
-	svgDivGraph = document.getElementById("svgDivGraph");
-    svgWidth = +500;
-    svgHeight = +500;
     sleep(3000);
-    svg2 = d3.select("#svgDivGraph")
+    d3.select("#svg-div-1")
         .append("svg")
         .attr("width", '100%')
         .attr("height", '100%')
         .attr("id", "drawnSvg2");
-    svg2.append('g').attr('id',`plot${fileNames[1].split('.csv')[0]}`);
-    svg2.append('g').attr('id',`guide${fileNames[1].split('.csv')[0]}`);
+    d3.select("#svg-div-1").append('g').attr('id',`plot${fileNames[1].split('.csv')[0]}`);
+    d3.select("#svg-div-1").append('g').attr('id',`guide${fileNames[1].split('.csv')[0]}`);
 	
 	fetchCsvCallOthers(fileNames[1]);
 
 });
 
-function sleep(delay) {
-    var start = new Date().getTime();
+const sleep = (delay) => {
+    const start = new Date().getTime();
     while (new Date().getTime() < start + delay);
 }
 
 
-function fetchCsvCallOthers(file)
-{
-    
+const fetchCsvCallOthers = (file) => {
 
     console.log('fetching csv data.');
 
-    var drawnSvg = document.getElementById("drawnSvg");
-    //removing previously drawn circles
-    if(drawnSvg != undefined) {
+    // Removing previously drawn circles
+    if(document.getElementById("drawnSvg") != undefined) {
         
         d3.select('#'+file).select(`#plot${file.split('.csv')[0]}`).selectAll('*').remove();
         d3.select('#'+file).select(`#guide${file.split('.csv')[0]}`).selectAll('*').remove();
     }
-    console.log(file)
+    
     d3.csv(file)
-    .then(function(data){
+    .then((data) => {
         //converting all rows to int
-        data.forEach(function(d,i) {
-            d.number = +d.number;
+        data.forEach((d,i) => {
+            d.number = +1;
             d.time = +d.time;
             d.duration = +d.duration;
-            d.x = +d.x;
-            d.y = +d.y;
-            // d.avg_dilation = +d.avg_dilation;    //not convert to number in order to detect nan value!
+            d.x = +d.screen_x;
+            d.y = +d.screen_y;
         });
         mergedData = data;
         setScales(mergedData, file);
@@ -90,8 +79,7 @@ function fetchCsvCallOthers(file)
     });
 }
 
-function render(dataset, file)
-{
+const render = (dataset, file) => {
     console.log('drawing circles.');
     console.log(`dataset:`)
     console.dir(dataset[0])
@@ -103,10 +91,10 @@ function render(dataset, file)
         .style("visibility", "hidden")
         .text("");
     if (file === fileNames[0]) {
-        var plotG = svg1.select(`#plot${file.split('.csv')[0]}`);
+        var plotG = d3.select("#svg-div-0").select(`#plot${file.split('.csv')[0]}`);
     }
     else if (file === fileNames[1]) {
-        var plotG = svg2.select(`#plot${file.split('.csv')[0]}`);
+        var plotG = d3.select("#svg-div-1").select(`#plot${file.split('.csv')[0]}`);
     }
 
     
@@ -115,24 +103,26 @@ function render(dataset, file)
         .attr("class", "hull");
     //put scaled d.x and d.y into vertices
     vertices = [];
-    mergedData.forEach(function(d,i){
+    mergedData.forEach((d,i) => {
         vertices[i] = [xScale(d.x), yScale(d.y)];   //for convex hull
     });
     convexhull.datum(d3.polygonHull(vertices))
-        .attr("points", function(d) { return d.join(" "); });
+        .attr("points", (d) => { return d.join(" "); });
         
+   // showConvexhull(false);
+    //showSaccades(true);
 
     // Bind dataset to lines (for saccades)
     var saccades = plotG.selectAll("line")
-        .data(dataset, function(d) {return d;}); //semantic binding
+        .data(dataset, (d) => {return d;}); //semantic binding
     // Add lines(saccades)
     saccades.enter().append("line")
         .classed('saccade', true)
-        .attr('x1', function(d,i){
+        .attr('x1', (d,i) => {
             var prev = (i>0) ? dataset[i-1] : d;
             return xScale(prev.x);
         })
-        .attr('y1', function(d,i){
+        .attr('y1', (d,i) => {
             var prev = (i>0) ? dataset[i-1] : d;
             return yScale(prev.y);
         })
@@ -140,24 +130,24 @@ function render(dataset, file)
         .attr('y2', d => yScale(d.y))
         .attr('visibility','hidden')
         .transition()
-            .delay(function(d, i){
+            .delay((d, i) => {
                 return timeScale(i*d.time);
             })
         .attr("visibility", "visible");
 
     // Bind dataset to circles (for fixations)
     var fixations = plotG.selectAll("circle")
-        .data(dataset, function(d) { return d; }); //semantic binding
+        .data(dataset, (d) => { return d; }); //semantic binding
     // Add circles(fixations)
     fixations.enter().append("circle")
         .classed('fixation', true)
         .attr("cx", d => xScale(d.x))
         .attr("cy", d => yScale(d.y))
         .attr("r", d => rScale(d.duration))
-        .attr("fill", function(d){
+        .attr("fill", (d) => {
             return (d.avg_dilation=="") ? 'darkgray' : colorScale(+d.avg_dilation);
         })
-        .on('mouseover', function(d) {
+        .on('mouseover', (d) => {
             const msg = "<b>#" + d.number + "</b><br>"
                       + "<b>time</b>     " + formatToMinuteSecond(d.time) + "<br>"
                       + "<b>x</b>:" + d.x+", <b>y</b>:"+d.y + "<br>"
@@ -167,18 +157,18 @@ function render(dataset, file)
             tooltip.html(msg);
             tooltip.style("visibility", "visible");
         })
-        .on("mousemove", function(d, i) {
+        .on("mousemove", (d, i) => {
             return tooltip.style("top",
                 (d3.event.pageY-10)+"px")
                     .style("left",(d3.event.pageX+10)+"px");
         })
-        .on('mouseout', function(d, i){
+        .on('mouseout', (d, i) => {
             tooltip.style("visibility", "hidden");
             d3.select('#details').html('');
         })
         .attr("visibility","hidden")
         .transition()
-            .delay(function(d, i){
+            .delay((d, i) => {
                 return timeScale(i*d.time);
             })
         .attr("visibility", "visible")
@@ -187,26 +177,23 @@ function render(dataset, file)
             showTimeSlider(true);
         });
         
+        
+        //initial mode to xy
         currentViewOption = ViewOption.XY;
         d3.select('#viewOptions').selectAll('button').classed('active', false);
         d3.select('#viewOption-xy').classed('active', true);
 }
 
-function showTimeSlider(show){
+const showTimeSlider = (show) => {
     if(show == true) {
-        timeSlider0.style("visibility", "visible");
-        timeSlider1.style("visibility", "visible");
         d3.select('#timeLabel0').style("visibility", "visible");
         d3.select('#timeLabel1').style("visibility", "visible");
     } else {
-        timeSlider0.style("visibility", "hidden");
-        timeSlider1.style("visibility", "hidden");
         d3.select('#timeLabel0').style("visibility", "hidden");    
         d3.select('#timeLabel1').style("visibility", "hidden");   
     }
 }
-function setScales(data, file)
-{
+const setScales = (data, file) => {
     console.log('setting scales.');
 
     const xValue = d => d.x;
@@ -258,49 +245,51 @@ function setScales(data, file)
     }
 }
 
-function filterByTime(val, n) {
 
+const filterByTime = (val, n) => {
     //showConvexhull('disable');
     if (n == 0) {
-        timeSlider0.attr('value', val);
+        d3.select('#timeRange0').attr('value', val);
         console.log(`timeSlider2.val: ${val}`);
     }
     else if (n == 1) {
-        timeSlider1.attr('value', val);
+        d3.select('#timeRange1').attr('value', val);
         console.log(`timeSlider1.val: ${val}`);
     }
     var milliSeconds = val * 1000;
     updateTimeLabel(formatToMinuteSecond(milliSeconds), n);
     if (n == 0) {
-        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
+        d3.select("#svg-div-0").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
             .style('visibility', 'hidden')
-            .filter(function(d) {
+            .filter((d) => {
                 return (d.time <= milliSeconds);
             })
             .style('visibility', 'visible');
-        svg1.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
-        .style('visibility', 'hidden')
-        .filter(function(d) {
-            return (d.time <= milliSeconds);
-        })
-        .style('visibility', 'visible');
+        d3.select("#svg-div-0").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
+            .style('visibility', 'hidden')
+            .filter((d) => {
+                return (d.time <= milliSeconds);
+            })
+            .style('visibility', 'visible');
     }
     else if (n === 1) {
-        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
+        d3.select("#svg-div-1").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('circle')
             .style('visibility', 'hidden')
-            .filter(function(d) {
+            .filter((d) => {
                 return (d.time <= milliSeconds);
             })
             .style('visibility', 'visible');
-        svg2.select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
+        d3.select("#svg-div-1").select(`#plot${fileNames[n].split('.csv')[0]}`).selectAll('line')
         .style('visibility', 'hidden')
-        .filter(function(d) {
+        .filter((d) => {
             return (d.time <= milliSeconds);
         })
         .style('visibility', 'visible');
     }
+
 }
-function formatToMinuteSecond(milliSeconds) {
+
+const formatToMinuteSecond = (milliSeconds) => {
     var minutes = Math.floor(milliSeconds / 60000);
     var seconds = ((milliSeconds % 60000) / 1000).toFixed(0);
     return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
