@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const fetchCsvCallOthers = (file,i) => {
     // Removing previously drawn circles
     if(document.getElementById(`svg-div-${i}`) != undefined) {
-        d3.select('#'+file).select(`#plot${file.split('.csv')[0]}`).selectAll('*').remove();
+        d3.select(`#svg-div-${i}`).select(`#plot${file.split('.csv')[0]}`).selectAll('*').remove();
     }
     
     d3.csv(file)
