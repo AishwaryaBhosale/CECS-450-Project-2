@@ -1,51 +1,64 @@
 <!DOCTYPE html>
 <html>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
-<!-- D3.js -->
-<script src="https://d3js.org/d3.v5.min.js"></script>
- <script type="text/javascript" src="script.js"></script>
-
-
-
-<!-- Bootstrap -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-<head>
-    <meta charset="UTF-8">
-    <title>Tree Fixation Points</title>
-</head>
-<body>
-<div style="float:left">
-<p>Tree</p>
-    <div style="width: 500px; height: 500px; border: 2px solid black;">
-        <svg id="svgDivTree" width="500" height="500"></svg>
- <div id="time-div" class="slider-container pt-2 unselectable mb-2">
-                <input type="range" id="timeRange" class="slider"
-                    oninput="filterByTime(this.value)" min='0' max='' step='1' value='' >
-                <p id="timeLabel" for="timeRange" class="m-0" >m:ss</p>
-                <!-- <button id="playBtn" class="btn btn-danger btn-sm" onclick="play()">▶</button> -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="script.js"></script>
+    <!-- Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <title>Eye Gaze Data Visualization</title>
+    </head>
+    <body>
+        <h1 style="margin-left: 36.5%; margin-top: 50px; position:absolute;">Eye Gaze Data Visualization</h1>
+        <div class="flex-container">
+            <div style="width:500px; text-align: center; margin-right: 50px">
+                <h>Tree</h>
+                <div style="width: 500px; height: 500px; border: 2px solid black;">
+                    <svg id="svg-div-0" width="500" height="500"></svg>
+                    <div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                        <label>Time</label>
+                        <input type="range" id="slider-0" class="slider"
+                            oninput="filterByTime(this.value, 0)" min='0' max='1000' step='1' value='0' >
+                        <p id="time-label-0" for="timeRange0" class="m-0" >0:00 m:ss</p>
+                    </div>
+                    <div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                        <label>Pupil Dilation</label>
+                        <input type="range" id="pupilSlider-0" class="slider"
+                            oninput="filterByDilation(this.value, 0)" min='0' max='1000' step='1' value='0' >
+                        <p id="pupil-label-0" for="timeRange" class="m-0" >0:00 mm</p>
+                    </div>
+                </div>
             </div>
-    </div>
-	</div>
-	<div style="float:right">
-
-<p>Graph</p>
-    <div style="width: 500px; height: 500px; border: 2px solid black;">
-        <svg id="svgDivGraph" width="500" height="500"></svg>
- <div id="time-div" class="slider-container pt-2 unselectable mb-2">
-                <input type="range" id="timeRange" class="slider"
-                    oninput="filterByTime(this.value)" min='0' max='' step='1' value='' >
-                <p id="timeLabel" for="timeRange" class="m-0" >m:ss</p>
-                <!-- <button id="playBtn" class="btn btn-danger btn-sm" onclick="play()">▶</button> -->
+            <div style="width:500px; text-align: center; margin-left: 50px">
+                <h>Graph</h>
+                <div style="width: 500px; height: 500px; border: 2px solid black;">
+                    <svg id="svg-div-1" width="500" height="500"></svg>
+                    <div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                        <label>Time</label>
+                        <input type="range" id="slider-1" class="slider"
+                            oninput="filterByTime(this.value, 1)" min='0' max='1000' step='1' value='0' >
+                        <p id="time-label-1" for="timeRange1" class="m-0" >0:00 m:ss</p>
+                    </div>
+                    <div id="time-div" class="slider-container pt-2 unselectable mb-2">
+                        <label>Pupil Dilation</label>
+                        <input type="range" id="pupilSlider-1" class="slider"
+                            oninput="filterByDilation(this.value, 1)" min='0' max='1000' step='1' value='0' >
+                        <p id="pupil-label-1" for="timeRange" class="m-0" >0:00 mm</p>
+                    </div>
+                </div>
             </div>
-    </div>
-</div>
-</body>
+			
+        </div>
+        <button style="background: #0099ff; border-radius: 5px; border-width: 1px; color:#f8f9fa; margin-left: 47.5%" onclick="clearFilters()"> Clear Filters</button>
+
+    </body>
 </html>
