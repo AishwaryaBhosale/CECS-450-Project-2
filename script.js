@@ -36,8 +36,8 @@ const fetchCsvCallOthers = (file,i) => {
             d.number = +1;
             d.time = +d.time;
             d.duration = +d.duration;
-            d.x = +d.x;
-            d.y = +d.y;
+            d.x = +d.screen_x;
+            d.y = +d.screen_y;
         });
         mergedData = data;
         setScales(mergedData, file);
@@ -272,4 +272,3 @@ const clearFilters = () => {
         fetchCsvCallOthers(fileNames[i],i);
     }
 }
-
